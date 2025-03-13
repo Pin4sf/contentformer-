@@ -21,7 +21,7 @@ A Next.js application that helps you transform video transcripts into various co
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd loom-to-script/loom-converter
+   cd contentformer
    ```
 
 2. Install dependencies:
@@ -29,25 +29,60 @@ A Next.js application that helps you transform video transcripts into various co
    npm install
    ```
 
-3. Run the development server:
+3. Set up environment variables:
+   - Create a `.env.local` file in the root directory
+   - Add your API keys:
+     ```
+     ANTHROPIC_API_KEY=your_anthropic_api_key_here
+     OPENAI_API_KEY=your_openai_api_key_here
+     PREFERRED_PROVIDER=anthropic
+     NEXT_PUBLIC_SITE_URL=http://localhost:3000
+     ```
+
+4. Run the development server:
    ```bash
    npm run dev
    ```
 
-4. Open `http://localhost:3000` in your browser
+5. Open `http://localhost:3000` in your browser
+
+## Production Deployment
+
+When deploying to production (e.g., Railway, Vercel, etc.):
+
+1. Set the following environment variables in your hosting platform:
+   - `ANTHROPIC_API_KEY`
+   - `OPENAI_API_KEY`
+   - `PREFERRED_PROVIDER` (optional, defaults to "anthropic")
+   - `NEXT_PUBLIC_SITE_URL` (the URL of your deployed application)
+
+2. Build and deploy the application:
+   ```bash
+   npm run build
+   npm start
+   ```
+
+### Troubleshooting Production Issues
+
+If you encounter API errors in production:
+
+1. Verify that environment variables are properly set in your hosting platform
+2. Check that the API keys are valid and have the correct permissions
+3. Ensure the `ANTHROPIC_API_KEY` starts with "sk-ant" and the `OPENAI_API_KEY` starts with "sk-"
+4. Check application logs for specific error messages
 
 ## Configuration
 
-The application requires API keys to function:
+The application supports multiple ways to configure API keys:
 
-1. Click the settings (cog) icon to open the API configuration dialog.
-2. Enter your API keys:
-   - Anthropic API key for Claude models
-   - OpenAI API key for GPT models
-3. Select your preferred provider.
-4. Save your configuration.
+1. **Environment Variables**: Set `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` in your environment
+2. **UI Settings**: Click the settings (cog) icon to open the API configuration dialog
+3. **HTTP-only Cookies**: For secure storage (automatically used with the UI settings)
 
-API keys are stored in your browser's localStorage for convenience.
+API keys are stored securely with the following priority:
+1. Environment variables (highest priority)
+2. HTTP-only cookies
+3. Browser localStorage (lowest priority)
 
 ## Usage
 

@@ -20,18 +20,53 @@ export default function ApiConnectionTest({ config }: { config: any }) {
         setResult(null);
 
         try {
+            // Make sure we have valid API keys before testing
+            const validConfig = {
+                anthropicApiKey: config.anthropicApiKey?.trim() || "",
+                openaiApiKey: config.openaiApiKey?.trim() || "",
+                preferredProvider: config.preferredProvider || "anthropic",
+            };
+            
+            // Exit early if no API key is provided for the selected provider
+            if (validConfig.preferredProvider === "anthropic" && !validConfig.anthropicApiKey) {
+                setResult({
+                    success: false,
+                    message: "Anthropic API key is required for testing with Anthropic provider"
+                });
+                setTesting(false);
+                return;
+            }
+            
+            if (validConfig.preferredProvider === "openai" && !validConfig.openaiApiKey) {
+                setResult({
+                    success: false,
+                    message: "OpenAI API key is required for testing with OpenAI provider"
+                });
+                setTesting(false);
+                return;
+            }
+            
             // Pass the config to the server action
             const testResult = await testApiConnection({
-                anthropicApiKey: config.anthropicApiKey,
-                openaiApiKey: config.openaiApiKey,
-                preferredProvider: config.preferredProvider,
+                anthropicApiKey: validConfig.anthropicApiKey,
+                openaiApiKey: validConfig.openaiApiKey,
+                preferredProvider: validConfig.preferredProvider,
             });
+            
             setResult(testResult);
         } catch (error: any) {
+            // Handle serialization errors by extracting just the message
+            let errorMessage = "";
+            if (typeof error === "object") {
+                errorMessage = error.message || "Unknown error occurred";
+            } else {
+                errorMessage = String(error);
+            }
+            
             setResult({
                 success: false,
-                message: formatApiError(error),
-                error,
+                message: formatApiError(errorMessage),
+                error: { message: errorMessage }
             });
         } finally {
             setTesting(false);
@@ -63,8 +98,8 @@ export default function ApiConnectionTest({ config }: { config: any }) {
                 <div
                     className={`p-3 rounded-md text-sm flex items-start gap-2 ${
                         result.success
-                            ? "bg-green-50 text-green-700"
-                            : "bg-red-50 text-red-700"
+                            ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                            : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
                     }`}
                 >
                     {result.success ? (

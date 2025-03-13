@@ -3,8 +3,8 @@ import {
     generateContentIdeas as generateContentIdeasServer,
     generateVideoScript as generateVideoScriptServer,
     generateLinkedInPost as generateLinkedInPostServer,
-    refineVideoScript as refineVideoScriptServer,
-    regenerateVideoScript as regenerateVideoScriptServer,
+    refineVideoScriptServer,
+    regenerateVideoScriptServer,
 } from "@/app/actions";
 
 // Types for our API responses
@@ -167,7 +167,6 @@ export async function saveApiConfigToCookie(config: {
 }) {
     try {
         // Determine the correct API endpoint URL
-        // This handles both localhost and the browser preview proxy URL
         let apiUrl = '/api/set-credentials';
         
         // If we're in a browser preview environment, we need to use the absolute URL
@@ -235,7 +234,13 @@ export async function testApiConnection() {
         return await testApiConnectionServer(config);
     } catch (error: any) {
         console.error("API connection test failed:", error);
-        throw error;
+        // Convert error to a plain object to avoid serialization issues
+        const errorObj = {
+            message: error.message || "Unknown error",
+            status: error.status,
+            code: error.code
+        };
+        throw errorObj;
     }
 }
 
@@ -253,7 +258,13 @@ export async function generateContentIdeas(
         );
     } catch (error: any) {
         console.error("Error generating content ideas:", error);
-        throw error;
+        // Convert error to a plain object
+        const errorObj = {
+            message: error.message || "Unknown error",
+            status: error.status,
+            code: error.code
+        };
+        throw errorObj;
     }
 }
 
@@ -273,7 +284,13 @@ export async function generateVideoScript(
         );
     } catch (error: any) {
         console.error("Error generating video script:", error);
-        throw error;
+        // Convert error to a plain object
+        const errorObj = {
+            message: error.message || "Unknown error",
+            status: error.status,
+            code: error.code
+        };
+        throw errorObj;
     }
 }
 
@@ -313,14 +330,13 @@ export async function refineVideoScript(
         return result;
     } catch (error: any) {
         console.error("Error refining video script:", error);
-        // Rethrow with more context if needed
-        if (error.message.includes('API key')) {
-            throw new Error(`API key issue: ${error.message}`);
-        } else if (error.message.includes('timeout')) {
-            throw new Error(`Timeout: The refinement request took too long. Please try again.`);
-        } else {
-            throw error;
-        }
+        // Convert error to a plain object
+        const errorObj = {
+            message: error.message || "Unknown error",
+            status: error.status,
+            code: error.code
+        };
+        throw errorObj;
     }
 }
 
@@ -366,14 +382,13 @@ export async function regenerateVideoScript(
         return result;
     } catch (error: any) {
         console.error("Error regenerating video script:", error);
-        // Rethrow with more context if needed
-        if (error.message.includes('API key')) {
-            throw new Error(`API key issue: ${error.message}`);
-        } else if (error.message.includes('timeout')) {
-            throw new Error(`Timeout: The regeneration request took too long. Please try again.`);
-        } else {
-            throw error;
-        }
+        // Convert error to a plain object
+        const errorObj = {
+            message: error.message || "Unknown error",
+            status: error.status,
+            code: error.code
+        };
+        throw errorObj;
     }
 }
 
@@ -384,6 +399,12 @@ export async function generateLinkedInPost(script: VideoScript) {
         return await generateLinkedInPostServer(config, script);
     } catch (error: any) {
         console.error("Error generating LinkedIn post:", error);
-        throw error;
+        // Convert error to a plain object
+        const errorObj = {
+            message: error.message || "Unknown error",
+            status: error.status,
+            code: error.code
+        };
+        throw errorObj;
     }
 }

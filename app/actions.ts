@@ -46,18 +46,20 @@ export async function testApiConnection(config: {
             provider === "anthropic" &&
             (!config.anthropicApiKey || config.anthropicApiKey.trim() === "")
         ) {
-            throw new Error(
-                "Anthropic API key is missing. Please add your API key in settings."
-            );
+            return {
+                success: false,
+                message: "Anthropic API key is missing. Please add your API key in settings.",
+            };
         }
 
         if (
             provider === "openai" &&
             (!config.openaiApiKey || config.openaiApiKey.trim() === "")
         ) {
-            throw new Error(
-                "OpenAI API key is missing. Please add your API key in settings."
-            );
+            return {
+                success: false,
+                message: "OpenAI API key is missing. Please add your API key in settings.",
+            };
         }
 
         const prompt =
@@ -87,16 +89,24 @@ export async function testApiConnection(config: {
                 };
             } catch (error: any) {
                 clearTimeout(timeoutId);
+                // Convert Error to plain object to avoid serialization issues
+                const errorMessage = error?.message || "Unknown error";
+                
                 if (
                     error.status === 401 ||
-                    error.message?.includes("401") ||
-                    error.message?.includes("unauthorized")
+                    errorMessage.includes("401") ||
+                    errorMessage.includes("unauthorized")
                 ) {
-                    throw new Error(
-                        "Invalid Anthropic API key. Please check your API key and try again."
-                    );
+                    return {
+                        success: false,
+                        message: "Invalid Anthropic API key. Please check your API key and try again.",
+                    };
                 }
-                throw error;
+                
+                return {
+                    success: false,
+                    message: `Anthropic API error: ${errorMessage}`,
+                };
             }
         } else if (provider === "openai" && config.openaiApiKey) {
             const controller = new AbortController();
@@ -119,28 +129,39 @@ export async function testApiConnection(config: {
                 };
             } catch (error: any) {
                 clearTimeout(timeoutId);
+                // Convert Error to plain object to avoid serialization issues
+                const errorMessage = error?.message || "Unknown error";
+                
                 if (
                     error.status === 401 ||
-                    error.message?.includes("401") ||
-                    error.message?.includes("unauthorized")
+                    errorMessage.includes("401") ||
+                    errorMessage.includes("unauthorized")
                 ) {
-                    throw new Error(
-                        "Invalid OpenAI API key. Please check your API key and try again."
-                    );
+                    return {
+                        success: false,
+                        message: "Invalid OpenAI API key. Please check your API key and try again.",
+                    };
                 }
-                throw error;
+                
+                return {
+                    success: false,
+                    message: `OpenAI API error: ${errorMessage}`,
+                };
             }
         } else {
-            throw new Error(
-                "No valid API configuration found. Please check your API settings."
-            );
+            return {
+                success: false,
+                message: "No valid API configuration found. Please check your API settings.",
+            };
         }
     } catch (error: any) {
         console.error("API connection test failed:", error);
+        // Convert Error to plain object to avoid serialization issues
+        const errorMessage = error?.message || "Unknown error";
+        
         return {
             success: false,
-            message: error.message || "Failed to connect to API service",
-            error,
+            message: errorMessage || "Failed to connect to API service",
         };
     }
 }
